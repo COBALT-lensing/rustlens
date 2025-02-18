@@ -112,7 +112,7 @@ pub fn witt_mao_magnification(l: f64, re: f64, rstar: f64) -> PyResult<f64> {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn wittmao(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn rustlens(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(witt_mao_magnification, m)?)?;
     m.add_function(wrap_pyfunction!(integrated_witt_mao_magnification, m)?)?;
     Ok(())
