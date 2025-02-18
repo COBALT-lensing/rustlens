@@ -13,6 +13,8 @@ fn ellippi(n: f64, m: f64) -> Result<f64, &'static str> {
 }
 
 const LD_COEFF: f64 = 0.6;
+// The integral of ld_linear; no need to compute this every time
+const LD_LINEAR_INT: f64 = 2.5132741228717936;
 
 fn ld_linear(r: f64) -> f64 {
     return 1.0 - LD_COEFF * (1.0 - (1.0 - r.powi(2)).sqrt());
@@ -20,13 +22,13 @@ fn ld_linear(r: f64) -> f64 {
 
 #[pyfunction]
 pub fn integrated_witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<f64>> {
-    let b_int = integrate(
-        |r: f64| -> f64 { 2.0 * f64::consts::PI * r * ld_linear(r) },
-        0.0,
-        1.0,
-        1e-16,
-    )
-    .integral;
+    // let b_int = integrate(
+    //     |r: f64| -> f64 { 2.0 * f64::consts::PI * r * ld_linear(r) },
+    //     0.0,
+    //     1.0,
+    //     1e-16,
+    // )
+    // .integral;
     let mut res = Vec::new();
     for umag in witt_mao_magnification(l, re, rstar)? {
         let radial_witt_mao_magnification = |r: f64| -> f64 {
@@ -57,7 +59,7 @@ pub fn integrated_witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> Py
             1e-16,
         )
         .integral;
-        res.push(mag_int / b_int);
+        res.push(mag_int / LD_LINEAR_INT);
     }
     return Ok(res);
 }
