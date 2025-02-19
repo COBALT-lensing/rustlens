@@ -17,17 +17,17 @@ The plan is to eventually implement multiple lensing calculations. So far the on
 ```python
 import rustlens
 
-rustlens.witt_mao_magnification(l=0.2, rstar=2.0, re=0.5)
+rustlens.witt_mao_magnification(l=[0.0, 0.2, 0.4, 0.6], rstar=2.0, re=0.5)
 ```
 
-Where `l` is the distance of the lens from the centre of the source, normalised so that `l=1` is the edge of the disk, `rstar` is the source radius, and `re` is the Einstein ring radius (in any units as long as they're the same as each other).
+Where `l` is the distance of the lens from the centre of the source (as a list), normalised so that `l=1` is the edge of the disk, `rstar` is the source radius, and `re` is the Einstein ring radius (in any units as long as they're the same as each other).
 
 To compute the brightness-integrated magnification for a non-uniform source, use:
 
 ```python
 import rustlens
 
-rustlens.integrated_witt_mao_magnification(l=0.2, rstar=2.0, re=0.5)
+rustlens.integrated_witt_mao_magnification(l=[0.0, 0.2, 0.4, 0.6], rstar=2.0, re=0.5)
 ```
 
 This will assume the source is limb darkened using a linear limb darkening law. Eventually the intention is to allow custom brightness functions to be specified.
