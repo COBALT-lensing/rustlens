@@ -37,7 +37,13 @@ You can also specify an arbitrary brightness/flux map:
 ```python
 import rustlens
 
-rustlens.integrated_flux_map_witt_mao_magnification(l=[0.0, 0.2, 0.4, 0.6], rstar=2.0, re=0.5, bl=[...], bf=[...])
+rustlens.integrated_flux_map_witt_mao_magnification(
+    l=[0.0, 0.2, 0.4, 0.6],
+    rstar=2.0,
+    re=0.5,
+    bl=[...],
+    bf=[...],
+)
 ```
 
 Where `bl` is a list of coordinates and `bf` is the corresponding brightness at each point. These values will be interpolated to integrate the brightness profile.
