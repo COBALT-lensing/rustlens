@@ -1,5 +1,7 @@
 use core::f64;
 use ellip;
+use interp::interp;
+use interp::InterpMode;
 use numdiff::central_difference::sderivative;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
@@ -22,13 +24,41 @@ fn ld_linear(r: f64) -> f64 {
 
 #[pyfunction]
 pub fn integrated_witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<f64>> {
-    // let b_int = integrate(
-    //     |r: f64| -> f64 { 2.0 * f64::consts::PI * r * ld_linear(r) },
-    //     0.0,
-    //     1.0,
-    //     1e-16,
-    // )
-    // .integral;
+    return _integrated_witt_mao_magnification(l, re, rstar, &ld_linear, LD_LINEAR_INT);
+}
+
+#[pyfunction]
+pub fn integrated_flux_map_witt_mao_magnification(
+    l: Vec<f64>,
+    re: f64,
+    rstar: f64,
+    bl: Vec<f64>,
+    bf: Vec<f64>,
+) -> PyResult<Vec<f64>> {
+    assert_eq!(bl.len(), bf.len());
+
+    let flux_map = |r: f64| -> f64 {
+        return interp(&bl, &bf, r, &InterpMode::Constant(0.0));
+    };
+
+    let b_int = integrate(
+        |r: f64| -> f64 { 2.0 * f64::consts::PI * r * flux_map(r) },
+        0.0,
+        1.0,
+        1e-16,
+    )
+    .integral;
+
+    return _integrated_witt_mao_magnification(l, re, rstar, &flux_map, b_int);
+}
+
+fn _integrated_witt_mao_magnification(
+    l: Vec<f64>,
+    re: f64,
+    rstar: f64,
+    b: &dyn Fn(f64) -> f64,
+    b_int: f64,
+) -> PyResult<Vec<f64>> {
     let mut res = Vec::new();
     for umag in witt_mao_magnification(l, re, rstar)? {
         let radial_witt_mao_magnification = |r: f64| -> f64 {
@@ -52,14 +82,14 @@ pub fn integrated_witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> Py
                 2.0 * f64::consts::PI
                     * r
                     * (radial_witt_mao_magnification(r) + r / 2.0 * mag_deriv(r))
-                    * ld_linear(r)
+                    * b(r)
             },
             0.0,
             1.0,
             1e-16,
         )
         .integral;
-        res.push(mag_int / LD_LINEAR_INT);
+        res.push(mag_int / b_int);
     }
     return Ok(res);
 }
@@ -129,5 +159,9 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
 fn rustlens(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(witt_mao_magnification, m)?)?;
     m.add_function(wrap_pyfunction!(integrated_witt_mao_magnification, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        integrated_flux_map_witt_mao_magnification,
+        m
+    )?)?;
     Ok(())
 }
