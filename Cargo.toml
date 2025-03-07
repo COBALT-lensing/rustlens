@@ -9,7 +9,7 @@ name = "rustlens"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-ellip = "0.2.1"
+ellip = "0.3.0"
 interp = "2.0.2"
 numdiff = "0.1.5"
 pyo3 = "0.23.5"
