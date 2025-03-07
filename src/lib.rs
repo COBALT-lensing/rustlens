@@ -10,13 +10,6 @@ use std::iter::zip;
 
 const RADIUS_LIM: f64 = 1e-5;
 
-fn ellippi(n: f64, m: f64) -> Result<f64, &'static str> {
-    let y: f64 = 1.0 - m;
-    let rf: f64 = ellip::elliprf(0.0, y, 1.0)?;
-    let rj: f64 = ellip::elliprj(0.0, y, 1.0, 1.0 - n)?;
-    return Ok(rf + rj * n / 3.0);
-}
-
 const LD_COEFF: f64 = 0.6;
 // The integral of ld_linear; no need to compute this every time
 const LD_LINEAR_INT: f64 = 2.5132741228717936;
@@ -186,7 +179,7 @@ pub fn heyrovsky_magnification(l: f64, r: f64, re: f64, rstar: f64) -> PyResult<
         Ok(v) => v,
         Err(e) => return Err(PyRuntimeError::new_err(e)),
     };
-    let ellip3: f64 = match ellippi(elliptic_n, elliptic_m) {
+    let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
         Ok(v) => v,
         Err(e) => return Err(PyRuntimeError::new_err(e)),
     };
@@ -311,7 +304,7 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
             Ok(v) => v,
             Err(e) => return Err(PyRuntimeError::new_err(e)),
         };
-        let ellip3: f64 = match ellippi(elliptic_n, elliptic_m) {
+        let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
             Ok(v) => v,
             Err(e) => return Err(PyRuntimeError::new_err(e)),
         };
