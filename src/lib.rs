@@ -162,7 +162,7 @@ pub fn heyrovsky_magnification(l: f64, r: f64, re: f64, rstar: f64) -> PyResult<
         let l2: f64 = l.powi(2);
 
         let term1: f64 = 2.0 * epsilon / l * (1.0 - l_r_diff / (2.0 * l));
-        let term2: f64 = (8.0 * epsilon * l) / (l_r_diff.abs() * (l2 + epsilon2).sqrt()).ln();
+        let term2: f64 = ((8.0 * epsilon * l) / (l_r_diff.abs() * (l2 + epsilon2).sqrt())).ln();
         let term3: f64 = 4.0 * (l / epsilon).atan();
         let term4: f64 = (epsilon * (2.0 * l2 + epsilon2)) / (l2 * (l2 + epsilon2)) * l_r_diff;
         return Ok((term1 * term2 + term3 + term4) / (2.0 * f64::consts::PI));
