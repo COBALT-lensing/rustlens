@@ -156,9 +156,9 @@ pub fn heyrovsky_magnification(l: f64, r: f64, re: f64, rstar: f64) -> PyResult<
     let l_r_diff: f64 = l - r;
 
     if l_r_diff.abs() < RADIUS_LIM {
-        // if l_r_diff < 0.0 {
-        //     return Ok(0.0);
-        // }
+        if l_r_diff < 0.0 {
+            return Ok(0.0);
+        }
         let l2: f64 = l.powi(2);
 
         let term1: f64 = 2.0 * epsilon / l * (1.0 - l_r_diff / (2.0 * l));
