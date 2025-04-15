@@ -11,5 +11,10 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/COBALT-lensing/rustlens"
+Issues = "https://github.com/COBALT-lensing/rustlens/issues"
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
