@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "rustlens"
-version = "0.4.4-pre1"
+version = "0.4.4-pre2"
 dependencies = [
  "ellip",
  "interp",
