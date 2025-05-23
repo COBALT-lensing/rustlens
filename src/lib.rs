@@ -309,11 +309,11 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
             Err(e) => return Err(PyRuntimeError::new_err(e)),
         };
 
-        let kernel3: f64 = ellip1 * first_term - ellip2 * second_term + ellip3 * third_term;
-
-        let pos: f64 = (kernel3 + f64::consts::PI) / (2.0 * f64::consts::PI);
-        let neg: f64 = (kernel3 - f64::consts::PI) / (2.0 * f64::consts::PI);
-        res.push(pos + neg);
+        // Witt & Mao have a ±π in their equation, but we only ever want the total which
+        // simplifies to the following
+        res.push(
+            (ellip1 * first_term - ellip2 * second_term + ellip3 * third_term) / f64::consts::PI,
+        );
     }
     return Ok(res);
 }
