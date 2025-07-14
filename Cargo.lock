@@ -16,12 +16,13 @@ checksum = "b7914353092ddf589ad78f25c5c1c21b7f80b0ff8621e7c814c3485b5306da9d"
 
 [[package]]
 name = "ellip"
-version = "0.3.1"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b37e9c569fab3507e77857b5d206a354776fde071341e34ea9d28880242121be"
+checksum = "44d179dae1c8e83cc77a450bb975ef7bc11d533887d738f88b312a8ce58ecac6"
 dependencies = [
  "num-lazy",
  "num-traits",
+ "numeric_literals",
 ]
 
 [[package]]
@@ -81,9 +82,9 @@ dependencies = [
 
 [[package]]
 name = "num-lazy"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b0f392eb505dd839f58a97aa23256e446f9dcbc9ae901c36d4588f2de4f8f1d"
+checksum = "5b8d2525f2f80ed755ab12528ba733e89276e6b9807b3c8379b9e6948783394b"
 
 [[package]]
 name = "num-traits"
@@ -103,6 +104,16 @@ dependencies = [
  "linalg-traits",
  "num-traits",
  "once_cell",
+]
+
+[[package]]
+name = "numeric_literals"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "095aa67b0b9f2081746998f4f17106bdb51d56dc8c211afca5531b92b83bf98a"
+dependencies = [
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -172,7 +183,7 @@ dependencies = [
  "proc-macro2",
  "pyo3-macros-backend",
  "quote",
- "syn",
+ "syn 2.0.98",
 ]
 
 [[package]]
@@ -185,7 +196,7 @@ dependencies = [
  "proc-macro2",
  "pyo3-build-config",
  "quote",
- "syn",
+ "syn 2.0.98",
 ]
 
 [[package]]
@@ -212,6 +223,17 @@ dependencies = [
  "numdiff",
  "pyo3",
  "quadrature",
+]
+
+[[package]]
+name = "syn"
+version = "1.0.109"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
 ]
 
 [[package]]
