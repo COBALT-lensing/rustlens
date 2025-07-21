@@ -64,9 +64,9 @@ checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
 name = "linalg-traits"
-version = "0.11.1"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8314f1872f405d0b33a19be07f424d1049693909e3e7ca26448242d117627f3"
+checksum = "e430afe7fe9eed587c7e5d606e4807fb25140a35aa121c2808279473f8582086"
 dependencies = [
  "num-traits",
 ]
@@ -97,9 +97,9 @@ dependencies = [
 
 [[package]]
 name = "numdiff"
-version = "0.1.6"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62e003eebe0e478bbdbf3287a5aedce6431d40f16d9093c89785d90530cb1e8a"
+checksum = "3c117758bf522780821751919dcac03542d7f81bf78a5d605450041def419c6e"
 dependencies = [
  "linalg-traits",
  "num-traits",
@@ -118,9 +118,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.3"
+version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
+checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 
 [[package]]
 name = "portable-atomic"
