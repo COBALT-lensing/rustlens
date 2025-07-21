@@ -11,6 +11,6 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 ellip = "0.3.3"
 interp = "2.1.1"
-numdiff = "0.1.6"
+numdiff = "0.2.0"
 pyo3 = "0.25.1"
 quadrature = "0.1.2"
