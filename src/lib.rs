@@ -318,6 +318,25 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
     return Ok(res);
 }
 
+#[pyfunction]
+pub fn multi_witt_mao_magnification(
+    l: Vec<f64>,
+    re: Vec<f64>,
+    rstar: Vec<f64>,
+) -> PyResult<Vec<Vec<f64>>> {
+    let mut res: Vec<Vec<f64>> = Vec::new();
+
+    for _re in re.iter() {
+        for _rstar in rstar.iter() {
+            res.push(match witt_mao_magnification(l.clone(), *_re, *_rstar) {
+                Ok(v) => v,
+                Err(e) => return Err(PyRuntimeError::new_err(e)),
+            });
+        }
+    }
+    return Ok(res);
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn rustlens(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -327,6 +346,7 @@ fn rustlens(m: &Bound<'_, PyModule>) -> PyResult<()> {
         integrated_flux_map_witt_mao_magnification,
         m
     )?)?;
+    m.add_function(wrap_pyfunction!(multi_witt_mao_magnification, m)?)?;
 
     m.add_function(wrap_pyfunction!(heyrovsky_magnification, m)?)?;
     m.add_function(wrap_pyfunction!(integrated_heyrovsky_magnification, m)?)?;
