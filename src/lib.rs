@@ -326,12 +326,25 @@ pub fn multi_witt_mao_magnification(
 ) -> PyResult<Vec<Vec<f64>>> {
     let mut res: Vec<Vec<f64>> = Vec::new();
 
-    for _re in re.iter() {
-        for _rstar in rstar.iter() {
-            res.push(match witt_mao_magnification(l.clone(), *_re, *_rstar) {
-                Ok(v) => v,
-                Err(e) => return Err(PyRuntimeError::new_err(e)),
-            });
+    use rayon::prelude::*;
+
+    // Prepare all combinations of re and rstar
+    let combinations: Vec<(f64, f64)> = re
+        .iter()
+        .flat_map(|&_re| rstar.iter().map(move |&_rstar| (_re, _rstar)))
+        .collect();
+
+    // Compute in parallel
+    let results: Vec<Result<Vec<f64>, PyErr>> = combinations
+        .par_iter()
+        .map(|&(re_val, rstar_val)| witt_mao_magnification(l.clone(), re_val, rstar_val))
+        .collect();
+
+    // Collect results, returning early on error
+    for result in results {
+        match result {
+            Ok(v) => res.push(v),
+            Err(e) => return Err(PyRuntimeError::new_err(e)),
         }
     }
     return Ok(res);
