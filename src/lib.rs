@@ -263,58 +263,58 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
     let rstar_scaled: f64 = rstar / re;
     let rstar_scaled2: f64 = rstar_scaled.powi(2);
 
-    let mut res: Vec<f64> = Vec::new();
+    // let mut res: Vec<f64> = Vec::new();
 
-    for _l in l.iter() {
-        let l_scaled: f64 = _l * rstar_scaled;
+    use rayon::prelude::*;
 
-        let l_r_diff: f64 = l_scaled - rstar_scaled;
-        let l_r_sum: f64 = l_scaled + rstar_scaled;
+    let res = l
+        .par_iter()
+        .map(|_l| {
+            let l_scaled: f64 = _l * rstar_scaled;
 
-        if l_r_diff.abs() < RADIUS_LIM {
-            res.push(
-                ((2.0 / rstar_scaled)
+            let l_r_diff: f64 = l_scaled - rstar_scaled;
+            let l_r_sum: f64 = l_scaled + rstar_scaled;
+
+            if l_r_diff.abs() < RADIUS_LIM {
+                return ((2.0 / rstar_scaled)
                     + ((1.0 + rstar_scaled2) / rstar_scaled2)
                         * ((f64::consts::PI / 2.0)
                             + ((rstar_scaled2 - 1.0) / (rstar_scaled2 + 1.0)).asin()))
-                    / f64::consts::PI,
-            );
-            continue;
-        }
+                    / f64::consts::PI;
+            }
 
-        let kernel1: f64 = (l_r_diff).powi(2);
-        let kernel2: f64 = (4.0 + kernel1).sqrt();
+            let kernel1: f64 = (l_r_diff).powi(2);
+            let kernel2: f64 = (4.0 + kernel1).sqrt();
 
-        let elliptic_n: f64 = 4.0 * rstar_scaled * l_scaled / (l_r_sum).powi(2);
+            let elliptic_n: f64 = 4.0 * rstar_scaled * l_scaled / (l_r_sum).powi(2);
 
-        let elliptic_k: f64 = (4.0 * elliptic_n).sqrt() / kernel2;
-        let elliptic_m: f64 = elliptic_k.powi(2);
+            let elliptic_k: f64 = (4.0 * elliptic_n).sqrt() / kernel2;
+            let elliptic_m: f64 = elliptic_k.powi(2);
 
-        let first_term: f64 = (l_r_sum * kernel2) / (2.0 * rstar_scaled2);
-        let second_term: f64 = l_r_diff * (4.0 + (0.5 * (l_scaled.powi(2) - rstar_scaled2)))
-            / (kernel2 * rstar_scaled2);
-        let third_term: f64 =
-            2.0 * kernel1 * (1.0 + rstar_scaled2) / (rstar_scaled2 * l_r_sum * kernel2);
+            let first_term: f64 = (l_r_sum * kernel2) / (2.0 * rstar_scaled2);
+            let second_term: f64 = l_r_diff * (4.0 + (0.5 * (l_scaled.powi(2) - rstar_scaled2)))
+                / (kernel2 * rstar_scaled2);
+            let third_term: f64 =
+                2.0 * kernel1 * (1.0 + rstar_scaled2) / (rstar_scaled2 * l_r_sum * kernel2);
 
-        let ellip1: f64 = match ellip::ellipe(elliptic_m) {
-            Ok(v) => v,
-            Err(e) => return Err(PyRuntimeError::new_err(e)),
-        };
-        let ellip2: f64 = match ellip::ellipk(elliptic_m) {
-            Ok(v) => v,
-            Err(e) => return Err(PyRuntimeError::new_err(e)),
-        };
-        let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
-            Ok(v) => v,
-            Err(e) => return Err(PyRuntimeError::new_err(e)),
-        };
+            let ellip1: f64 = match ellip::ellipe(elliptic_m) {
+                Ok(v) => v,
+                Err(_e) => return f64::NAN, // propagate error as NaN
+            };
+            let ellip2: f64 = match ellip::ellipk(elliptic_m) {
+                Ok(v) => v,
+                Err(_e) => return f64::NAN,
+            };
+            let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
+                Ok(v) => v,
+                Err(_e) => return f64::NAN,
+            };
 
-        // Witt & Mao have a ±π in their equation, but we only ever want the total which
-        // simplifies to the following
-        res.push(
-            (ellip1 * first_term - ellip2 * second_term + ellip3 * third_term) / f64::consts::PI,
-        );
-    }
+            // Witt & Mao have a ±π in their equation, but we only ever want the total which
+            // simplifies to the following
+            (ellip1 * first_term - ellip2 * second_term + ellip3 * third_term) / f64::consts::PI
+        })
+        .collect();
     return Ok(res);
 }
 
