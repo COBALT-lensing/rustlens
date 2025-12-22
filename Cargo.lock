@@ -101,9 +101,9 @@ checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
 name = "linalg-traits"
-version = "0.12.1"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc9c76146b199837dae0d6d614c307862befbce177aa6b9a56113437e2ccb0dc"
+checksum = "13a31b363d2d47c51aec5eca46ff143c99af87beb9aeac59c40db5aafdf3d495"
 dependencies = [
  "num-traits",
  "tracing-subscriber",
@@ -150,13 +150,12 @@ dependencies = [
 
 [[package]]
 name = "numdiff"
-version = "0.2.1"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b27d13d487450bc6ef991b511017158c311fd982b3144d590a612ba020d83b6b"
+checksum = "b4ec74efc3cdc8b32d4143100094441227aa44191864e6fcf9f06efc3f64ddf3"
 dependencies = [
  "linalg-traits",
  "num-traits",
- "once_cell",
 ]
 
 [[package]]
@@ -352,9 +351,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.34"
+version = "0.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9d12581f227e93f094d3af2ae690a574abb8a2b9b7a96e7cfe9647b2b617678"
+checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 dependencies = [
  "once_cell",
  "valuable",
@@ -373,9 +372,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.3.20"
+version = "0.3.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2054a14f5307d601f88daf0553e1cbf472acc4f2c51afab632431cdcd72124d5"
+checksum = "2f30143827ddab0d256fd843b7a66d164e9f271cfa0dde49142c5ca0ca291f1e"
 dependencies = [
  "nu-ansi-term",
  "sharded-slab",
