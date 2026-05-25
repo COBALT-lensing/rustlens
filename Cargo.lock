@@ -114,9 +114,9 @@ dependencies = [
 
 [[package]]
 name = "numdiff"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cdd4567fdb9dcf37361ff63185f629fb518906abd7d40e16a94a0a3b1b28ad8"
+checksum = "84edf92a57f0e1a4a8e2cd781b80361334b1568c75a0ac2cdd296dfac73628df"
 dependencies = [
  "linalg-traits",
  "num-traits",
