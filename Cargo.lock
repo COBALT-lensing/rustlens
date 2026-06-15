@@ -89,9 +89,9 @@ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
 
 [[package]]
 name = "linalg-traits"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cc8b63e4456f343ee930b711006f27e5437e61d6078273951ace0b20d043435"
+checksum = "ec4b7ac946c17beaa870bebeb90712a6c2bdc5c1dc5481ae35638ee753083b2d"
 dependencies = [
  "num-traits",
 ]
@@ -114,9 +114,9 @@ dependencies = [
 
 [[package]]
 name = "numdiff"
-version = "0.7.3"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84edf92a57f0e1a4a8e2cd781b80361334b1568c75a0ac2cdd296dfac73628df"
+checksum = "be5d1dac4ec05a6eec6f78b8bfca53c85af9b541f2bf5c44bfe06adcdff34dce"
 dependencies = [
  "linalg-traits",
  "num-traits",
