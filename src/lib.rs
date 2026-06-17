@@ -9,6 +9,7 @@ use quadrature::integrate;
 use std::iter::zip;
 
 const RADIUS_LIM: f64 = 1e-5;
+const ANNULUS_WIDTH: f64 = 1e-4;
 
 const LD_COEFF: f64 = 0.6;
 // The integral of ld_linear; no need to compute this every time
@@ -188,7 +189,30 @@ pub fn heyrovsky_magnification(l: f64, r: f64, re: f64, rstar: f64) -> PyResult<
 
 #[pyfunction]
 pub fn integrated_witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<f64>> {
-    return _integrated_witt_mao_magnification(l, re, rstar, &ld_linear, LD_LINEAR_INT);
+    let rstar_scaled = rstar / re;
+    let mut res = Vec::new();
+
+    for _l in l.iter() {
+        let l_scaled = _l * rstar_scaled;
+        let cumulative_flux = |r: f64| -> f64 {
+            if r <= 0.0 {
+                return 0.0;
+            }
+            return r.powi(2) * witt_mao_magnification_scaled(l_scaled, rstar_scaled * r);
+        };
+        let mu_int = integrate(
+            |mu: f64| -> f64 { cumulative_flux((1.0 - mu.powi(2)).sqrt()) },
+            0.0,
+            1.0,
+            1e-16,
+        )
+        .integral;
+        let mag_int =
+            f64::consts::PI * ((1.0 - LD_COEFF) * cumulative_flux(1.0) + LD_COEFF * mu_int);
+        res.push(mag_int / LD_LINEAR_INT);
+    }
+
+    return Ok(res);
 }
 
 #[pyfunction]
@@ -224,28 +248,14 @@ fn _integrated_witt_mao_magnification(
     b_int: f64,
 ) -> PyResult<Vec<f64>> {
     let mut res = Vec::new();
-    for umag in witt_mao_magnification(l, re, rstar)? {
-        let radial_witt_mao_magnification = |r: f64| -> f64 {
-            if r < 0.0 {
-                return 0.0;
-            }
-            return umag;
-        };
-        let mag_deriv = |r: f64| -> f64 {
-            if r < 0.0 {
-                return 0.0;
-            }
-            return sderivative(
-                &|x: f64| -> f64 { radial_witt_mao_magnification(x) },
-                r,
-                None,
-            );
-        };
+    let rstar_scaled = rstar / re;
+    for _l in l.iter() {
+        let l_scaled = _l * rstar_scaled;
         let mag_int = integrate(
             |r: f64| -> f64 {
                 2.0 * f64::consts::PI
                     * r
-                    * (radial_witt_mao_magnification(r) + r / 2.0 * mag_deriv(r))
+                    * annular_witt_mao_magnification(l_scaled, rstar_scaled, r)
                     * b(r)
             },
             0.0,
@@ -258,12 +268,85 @@ fn _integrated_witt_mao_magnification(
     return Ok(res);
 }
 
+fn annular_witt_mao_magnification(l_scaled: f64, rstar_scaled: f64, r: f64) -> f64 {
+    let lower_radius = 0.0_f64.max(r - ANNULUS_WIDTH);
+    let upper_radius = 1.0_f64.min(r + ANNULUS_WIDTH);
+    let lower_area = lower_radius.powi(2);
+    let upper_area = upper_radius.powi(2);
+
+    if upper_area <= lower_area {
+        return f64::NAN;
+    }
+
+    let lower_flux = if lower_area == 0.0 {
+        0.0
+    } else {
+        lower_area * witt_mao_magnification_scaled(l_scaled, rstar_scaled * lower_radius)
+    };
+    let upper_flux =
+        upper_area * witt_mao_magnification_scaled(l_scaled, rstar_scaled * upper_radius);
+
+    return (upper_flux - lower_flux) / (upper_area - lower_area);
+}
+
+fn point_source_magnification(u: f64) -> f64 {
+    return (u.powi(2) + 2.0) / (u * (u.powi(2) + 4.0).sqrt());
+}
+
+fn witt_mao_magnification_scaled(l_scaled: f64, rstar_scaled: f64) -> f64 {
+    let rstar_scaled2: f64 = rstar_scaled.powi(2);
+
+    if rstar_scaled <= 0.0 {
+        return point_source_magnification(l_scaled);
+    }
+
+    let l_r_diff: f64 = l_scaled - rstar_scaled;
+    let l_r_sum: f64 = l_scaled + rstar_scaled;
+
+    let edge_lim = RADIUS_LIM.max(10.0 * ANNULUS_WIDTH * rstar_scaled.abs());
+    if l_r_diff.abs() < edge_lim {
+        return ((2.0 / rstar_scaled)
+            + ((1.0 + rstar_scaled2) / rstar_scaled2)
+                * ((f64::consts::PI / 2.0)
+                    + ((rstar_scaled2 - 1.0) / (rstar_scaled2 + 1.0)).asin()))
+            / f64::consts::PI;
+    }
+
+    let kernel1: f64 = (l_r_diff).powi(2);
+    let kernel2: f64 = (4.0 + kernel1).sqrt();
+
+    let elliptic_n: f64 = 4.0 * rstar_scaled * l_scaled / (l_r_sum).powi(2);
+
+    let elliptic_k: f64 = (4.0 * elliptic_n).sqrt() / kernel2;
+    let elliptic_m: f64 = elliptic_k.powi(2);
+
+    let first_term: f64 = (l_r_sum * kernel2) / (2.0 * rstar_scaled2);
+    let second_term: f64 =
+        l_r_diff * (4.0 + (0.5 * (l_scaled.powi(2) - rstar_scaled2))) / (kernel2 * rstar_scaled2);
+    let third_term: f64 =
+        2.0 * kernel1 * (1.0 + rstar_scaled2) / (rstar_scaled2 * l_r_sum * kernel2);
+
+    let ellip1: f64 = match ellip::ellipe(elliptic_m) {
+        Ok(v) => v,
+        Err(_e) => return f64::NAN,
+    };
+    let ellip2: f64 = match ellip::ellipk(elliptic_m) {
+        Ok(v) => v,
+        Err(_e) => return f64::NAN,
+    };
+    let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
+        Ok(v) => v,
+        Err(_e) => return f64::NAN,
+    };
+
+    // Witt & Mao have a ±π in their equation, but we only ever want the total which
+    // simplifies to the following.
+    return (ellip1 * first_term - ellip2 * second_term + ellip3 * third_term) / f64::consts::PI;
+}
+
 #[pyfunction]
 pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<f64>> {
     let rstar_scaled: f64 = rstar / re;
-    let rstar_scaled2: f64 = rstar_scaled.powi(2);
-
-    // let mut res: Vec<f64> = Vec::new();
 
     use rayon::prelude::*;
 
@@ -271,48 +354,7 @@ pub fn witt_mao_magnification(l: Vec<f64>, re: f64, rstar: f64) -> PyResult<Vec<
         .par_iter()
         .map(|_l| {
             let l_scaled: f64 = _l * rstar_scaled;
-
-            let l_r_diff: f64 = l_scaled - rstar_scaled;
-            let l_r_sum: f64 = l_scaled + rstar_scaled;
-
-            if l_r_diff.abs() < RADIUS_LIM {
-                return ((2.0 / rstar_scaled)
-                    + ((1.0 + rstar_scaled2) / rstar_scaled2)
-                        * ((f64::consts::PI / 2.0)
-                            + ((rstar_scaled2 - 1.0) / (rstar_scaled2 + 1.0)).asin()))
-                    / f64::consts::PI;
-            }
-
-            let kernel1: f64 = (l_r_diff).powi(2);
-            let kernel2: f64 = (4.0 + kernel1).sqrt();
-
-            let elliptic_n: f64 = 4.0 * rstar_scaled * l_scaled / (l_r_sum).powi(2);
-
-            let elliptic_k: f64 = (4.0 * elliptic_n).sqrt() / kernel2;
-            let elliptic_m: f64 = elliptic_k.powi(2);
-
-            let first_term: f64 = (l_r_sum * kernel2) / (2.0 * rstar_scaled2);
-            let second_term: f64 = l_r_diff * (4.0 + (0.5 * (l_scaled.powi(2) - rstar_scaled2)))
-                / (kernel2 * rstar_scaled2);
-            let third_term: f64 =
-                2.0 * kernel1 * (1.0 + rstar_scaled2) / (rstar_scaled2 * l_r_sum * kernel2);
-
-            let ellip1: f64 = match ellip::ellipe(elliptic_m) {
-                Ok(v) => v,
-                Err(_e) => return f64::NAN, // propagate error as NaN
-            };
-            let ellip2: f64 = match ellip::ellipk(elliptic_m) {
-                Ok(v) => v,
-                Err(_e) => return f64::NAN,
-            };
-            let ellip3: f64 = match ellip::ellippi(elliptic_n, elliptic_m) {
-                Ok(v) => v,
-                Err(_e) => return f64::NAN,
-            };
-
-            // Witt & Mao have a ±π in their equation, but we only ever want the total which
-            // simplifies to the following
-            (ellip1 * first_term - ellip2 * second_term + ellip3 * third_term) / f64::consts::PI
+            witt_mao_magnification_scaled(l_scaled, rstar_scaled)
         })
         .collect();
     return Ok(res);
