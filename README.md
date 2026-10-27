@@ -12,7 +12,7 @@ pip install rustlens
 
 ## Usage
 
-The plan is to eventually implement multiple lensing calculations. So far the only one available is based on [Witt & Mao (1994)](https://ui.adsabs.harvard.edu/abs/1994ApJ...430..505W/abstract). Compute the magnification for uniform sources as follows:
+The plan is to eventually implement multiple lensing calculations. So far the only two available are based on [Witt & Mao (1994)](https://ui.adsabs.harvard.edu/abs/1994ApJ...430..505W/abstract) and [Heyrovský (2003)](https://iopscience.iop.org/article/10.1086/376787/meta). Compute the magnification for uniform sources as follows:
 
 ```python
 import rustlens
